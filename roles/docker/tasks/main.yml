@@ -1,9 +1,39 @@
 ---
 # tasks file for docker
+- name: update all packages
+  yum:
+    name: '*'
+    state: latest
+
 - name: add packages needed for docker
   yum:
-    name:
+    name: "{{ packages }}"
+  vars:
+    packages:
       - yum-utils
       - device-mapper-persistent-data
       - lvm2
     state: latest
+  register: result
+
+- name: add docker-ce repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+
+- name: install docker
+  yum:
+    name: docker-ce
+    state: latest
+
+- name: start docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: ass user oelsner to docker group
+  user:
+    name: oelsner
+    groups: docker
+    append: yes
