@@ -1,0 +1,25 @@
+---
+# tasks file for initialize-cluster
+- name: pull required images
+  shell: kubeadm config images pull
+
+- name: reset kubeadm
+  shell: kubeadm reset -f
+  register: output
+
+- name: initialize cluster with pod network
+  shell: 'kubeadm init --pod-network-cidr=10.244.0.0/16'
+  register: output
+
+- name: Store logs and token
+  local_action: copy content={{ output.stdout }} dest={{ token_file }}
+  become: false
+
+- name: Copying required files
+  shell: |
+   mkdir -p $HOME/.kube
+   sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
+   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+- name: Install Network Add-on
+  command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
