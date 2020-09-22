@@ -1,10 +1,5 @@
 ---
 # tasks file for docker
-- name: update all packages
-  yum:
-    name: '*'
-    state: latest
-
 - name: add packages needed for docker
   yum:
     name: "{{ packages }}"
@@ -32,8 +27,9 @@
     state: started
     enabled: yes
 
-- name: ass user oelsner to docker group
+- name: add user oelsner to docker group
   user:
     name: oelsner
-    groups: docker
+    groups: 
+      - docker
     append: yes

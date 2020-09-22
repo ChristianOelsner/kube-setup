@@ -1,8 +1,37 @@
 ---
 
 - hosts: all
-  remote_user: root
-  
+  #remote_user: root
+  become: yes
   roles:
-    - docker
     - prereqs
+    - docker
+    - kube-repo-add
+
+- hosts: master
+  #remote_user: root
+  become: yes
+  roles:
+    - master-prep
+
+- hosts: workers
+  #remote_user: root
+  become: yes
+  roles:
+    - worker-prep
+
+- hosts: master
+  become: yes
+  vars_files:
+  - var_file
+
+  roles:
+    - initialize-cluster
+
+- hosts: workers
+  become: yes
+  vars_files:
+  - var_file
+
+  roles:
+    - join-workers
